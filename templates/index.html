@@ -9,18 +9,26 @@
       <meta name="viewport" content="initial-scale=1, maximum-scale=1">
       <!-- site metas -->
       <title>Beyond the Absence</title>
-      <meta name="keywords" content="">
-      <meta name="description" content="">
-      <meta name="author" content="">
+      <meta name="description" content="A community for single mothers blending emotional storytelling with powerful data insights.">
+      <meta name="keywords" content="single mother, motherhood, parenting, podcast, data insights, Beyond the Absence">
+
       <!-- bootstrap css -->
       <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
 
       <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+     
    </head>
    <!-- body -->
    <body class="main-layout">
@@ -102,11 +110,140 @@
          </div>
       </section>
       <!-- end about -->
+
+
       <!-- dashboard-->
-      <section id="dashboard">
+     <section id="dashboard" class="pb-5 bg-light">
+         <div class="container">
+            <div class="col-md-12">
+               <div class="titlepage text_align_center" style="margin-top: 5%;">
+                  <h2>Our Reality in Data</h2>
+               </div>
+            </div>
+            <div class="row">
+               <!-- Age Distribution -->
+               <div class="col-md-6 mb-4">
+                 <div class="card">
+                   <div class="card-body">
+                     <h5 class="card-title">Age Distribution</h5>
+                     <canvas id="ageChart"></canvas>
+                   </div>
+                 </div>
+               </div>
          
-      </section>
-      <!-- end our_mics -->
+               <!-- Feeling Anxious -->
+               <div class="col-md-6 mb-4">
+                 <div class="card">
+                   <div class="card-body">
+                     <h5 class="card-title">Feeling Anxious</h5>
+                     <canvas id="anxiousChart"></canvas>
+                   </div>
+                 </div>
+               </div>
+         
+               <!-- Suicide Attempt -->
+               <div class="col-md-6">
+                 <div class="card">
+                   <div class="card-body">
+                     
+                     <h5 class="card-title">Suicide Attempt</h5>   
+                     <div style="height: 258px;">
+                        <canvas id="suicideChart"></canvas>
+                     </div>   
+                   </div>
+                 </div>
+               </div>
+         
+               <!-- Trouble Sleeping -->
+               <div class="col-md-6 mb-4">
+                 <div class="card">
+                   <div class="card-body">
+                     <h5 class="card-title">Trouble Sleeping at Night</h5>
+                     <canvas id="sleepChart"></canvas>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         
+           <!-- Chart JS Scripts -->
+           <script>
+            // Age Chart
+            const ageCtx = document.getElementById('ageChart').getContext('2d');
+            new Chart(ageCtx, {
+              type: 'bar',
+              data: {
+                labels: {{ age_labels | tojson | safe }},
+                datasets: [{
+                  label: 'Number of Mothers',
+                  data: {{ age_data | tojson | safe }},
+                  backgroundColor: {{ age_colors | tojson | safe }},
+                  borderColor: {{ age_borders | tojson | safe }},
+                  borderWidth: 1
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+          
+            // Anxious Chart
+            const anxiousCtx = document.getElementById('anxiousChart').getContext('2d');
+            new Chart(anxiousCtx, {
+              type: 'bar',
+              data: {
+                labels: {{ anxious_labels | tojson | safe }},
+                datasets: [{
+                  label: 'Responses',
+                  data: {{ anxious_data | tojson | safe }},
+                  backgroundColor: {{ anxious_colors | tojson | safe }},
+                  borderColor: {{ anxious_borders | tojson | safe }},
+                  borderWidth: 1
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+          
+            // Suicide Attempt Chart
+            const suicideCtx = document.getElementById('suicideChart').getContext('2d');
+            new Chart(suicideCtx, {
+              type: 'pie',
+              data: {
+                labels: {{ suicide_labels | tojson | safe }},
+                datasets: [{
+                  label: 'Suicide Attempt',
+                  data: {{ suicide_data | tojson | safe }},
+                  backgroundColor: {{ suicide_colors | tojson | safe }},
+                  borderColor: '#fff',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false
+              }
+            });
+          
+            // Trouble Sleeping Chart
+            const sleepCtx = document.getElementById('sleepChart').getContext('2d');
+            new Chart(sleepCtx, {
+              type: 'bar',
+              data: {
+                labels: {{ sleep_labels | tojson | safe }},
+                datasets: [{
+                  label: 'Responses',
+                  data: {{ sleep_data | tojson | safe }},
+                  backgroundColor: {{ sleep_colors | tojson | safe }},
+                  borderColor: {{ sleep_borders | tojson | safe }},
+                  borderWidth: 1
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+          </script>
+          
+ </section>
+      
+
+      <!-- end dashboard -->
       
       <!-- contact section -->
       <section id="contact">
@@ -117,82 +254,136 @@
                      <h2>Share Your Storie with Me</h2>
                   </div>
                </div>
-               <div class="col-md-12">
-                  <form id="request" class="main_form">
+              
+                  <form action="/send_email" method="POST" id="request" class="main_form">
                      <div class="row">
-                        <div class="col-md-12 ">
-                           <input class="contactus" placeholder="You Name" type="type" name="Name"> 
+                        <div class="col-lg-6 col-md mb-3">
+                           <input class="contactus" placeholder="You Name" type="type" name="Name" required> 
                         </div>
-                        <div class="col-md-6">
-                           <input class="contactus" placeholder="Email" type="type" name="Email"> 
+                        
+                        <div class="col-lg-6 col-md mb-3">
+                           <input class="contactus" placeholder="Phone Number" type="type" name="Phone" required>                          
                         </div>
-                        <div class="col-md-6">
-                           <input class="contactus" placeholder="Phone Number" type="type" name="Phone Number">                          
+                        <div class="col-lg-12 col-md mb-3">
+                           <input class="contactus" placeholder="Email" type="type" name="Email" required> 
                         </div>
-                        <div class="col-md-12">
-                           <textarea class="textarea" placeholder="Message" type="Message"></textarea>
+                        <div class="col-lg-12 mb-3">
+                           <textarea class="textarea" placeholder="Message" name="Message" required></textarea>
                         </div>
-                        <div class="col-md-12">
-                           <button class="send_btn">Send</button>
-                        </div>
+                     
+                        <div class="text-center  mt-2">
+                           <button type="submit" class="btn btn-primary  pt-3 pb-3">
+                               Submit
+                               <i class="fas fa-paper-plane"></i>
+                           </button>
+                       </div>
+                     
                      </div>
                   </form>
-               </div>
+             
             </div>
          </div>
       </section>
       <!-- end contact section -->
       <!-- footer -->
-      <footer>
-         <div class="footer">
-            <div class="container">
-               <div class="row">
-                  
-                  <div class="col-md-5">
-                     <div class="Informa conta">
-                        <h3>Listen our Podcast</h3>
-                        <ul>
-                             <p><li><h4 style="color: white;">Spotify</h4> <a href="https://open.spotify.com/show/7djwr0RG98NuPgq1CXLZpK"><i class="bi bi-spotify"></i></a></li></p>
-                             <p>  <li><h4 style="color: white;">Apple Podcast</h4> <a href="https://podcasts.apple.com/us/podcast/beyond-the-absence-al%C3%A9m-da-aus%C3%AAncia/id1811469305"><i class="bi bi-apple"></i></a></li></p>
-                             <p>  <li><h4 style="color: white;">Amazon Music</h4> <a href="https://music.amazon.com/podcasts/b9450a4f-bdbc-459f-9d93-217addbff2e4/beyond-the-absence-além-da-ausência"><i class="bi bi-amazon"></i></a></li></p>
-                        </ul>
-                     </div>
-                  </div>
-                  <div class="col-md-5">
-                     <div class="Informa conta">
-                        <h3>Contact Us</h3>
-                        <ul>
-                           <li> <a href="Javascript:void(0)"> (+1) 3474301365
-                              </a>
-                           </li>
-                           <li> <a href="Javascript:void(0)">  suelmacruz22@gmail.com
-                              </a>
-                           </li>
-                        </ul>
-                     </div>
-                  </div>
-                 
-               </div>
+     
+      <footer class="footer">
+        <div class="container">
+          <div class="row">
+            <!-- CONTENT FOR THE MOBILE NUMBER  -->
+            <div class="col-md-4 col-lg-4 contact-box pt-1 d-md-block d-lg-flex d-flex">
+              <div class="contact-box__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-phone-call" viewBox="0 0 24 24" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
+                  <path d="M15 7a2 2 0 0 1 2 2" />
+                  <path d="M15 3a6 6 0 0 1 6 6" />
+                </svg>
+              </div>
+              <div class="contact-box__info">
+                <a href="#" class="contact-box__info--title">+1 374301365</a>
+              </div>
+            </div>  
+            <!-- CONTENT FOR EMAIL  -->
+            <div class="col-md-4 col-lg-4 contact-box pt-1 d-md-block d-lg-flex d-flex">
+              <div class="contact-box__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail-opened" viewBox="0 0 24 24" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <polyline points="3 9 12 15 21 9 12 3 3 9" />
+                  <path d="M21 9v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" />
+                  <line x1="3" y1="19" x2="9" y2="13" />
+                  <line x1="15" y1="13" x2="21" y2="19" />
+                </svg>
+              </div>
+              <div class="contact-box__info">
+                <a href="#" class="contact-box__info--title">suelmacruz22@gmail.com</a>
+              </div>
             </div>
-            <div class="copyright text_align_center">
-               <div class="container">
-                    
-                  <div class="row">
-                   
-                     <div class="col-md-10 offset-md-1">
-                        <p>© 2025 All Rights Reserved. SuelmaParisDevop </p>
-                     </div>
-                  </div>
-               </div>
+            <!-- CONTENT FOR LOCATION  -->
+            <div class="col-md-4 col-lg-4 contact-box pt-1 d-md-block d-lg-flex d-flex">
+              <div class="contact-box__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-map-2" viewBox="0 0 24 24" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <line x1="18" y1="6" x2="18" y2="6.01" />
+                  <path d="M18 13l-3.5 -5a4 4 0 1 1 7 0l-3.5 5" />
+                  <polyline points="10.5 4.75 9 4 3 7 3 20 9 17 15 20 21 17 21 15" />
+                  <line x1="9" y1="4" x2="9" y2="17" />
+                  <line x1="15" y1="15" x2="15" y2="20" />
+                </svg>
+              </div>
+              <div class="contact-box__info">
+                <a href="#" class="contact-box__info--title">New York, USA</a>
+              </div>
             </div>
-         </div>
+          </div>
+        </div>
+      
+        <!-- START THE SOCIAL MEDIA CONTENT  -->
+        <div class="footer-sm" style="background-color: #212121;">
+          <div class="container">
+            <div class="row py-4 text-center text-white">
+              <div class="col-lg-5 col-md-6 mb-4 mb-md-0">
+                Listen the Podcast
+              </div>
+              <div class="col-lg-7 col-md-6">
+      
+                <a href="https://open.spotify.com/show/7djwr0RG98NuPgq1CXLZpK"><i class="bi bi-spotify"></i></a>
+                <a href="https://podcasts.apple.com/us/podcast/beyond-the-absence-al%C3%A9m-da-aus%C3%AAncia/id1811469305
+                "><i class="bi bi-apple"></i></a>
+                <a href=""><i class="bi bi-amazon"></i></a>
+           
+              </div>
+            </div>
+          </div>
+        </div>
+      
+      
+      
+        <!-- START THE COPYRIGHT INFO  -->
+               <div class="footer-bottom pt-5 pb-5">
+          <div class="container">
+            <div class="row text-center text-white">
+              <div class="col-12">
+                <div class="footer-bottom__copyright">
+                  &COPY; Copyright 2025 | Created by <a href="https://portfolio-bk1e.onrender.com" target="_blank">SuelmaParisDevop</a><br><br>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </footer>
+      
+      <!-- BACK TO TOP BUTTON  -->
+      <a href="#" class="shadow btn-primary rounded-circle back-to-top">
+        <i class="fas fa-chevron-up"></i>
+      </a>
+           
       <!-- end footer -->
       <!-- Javascript files-->
-      <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
       <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
       <script src="{{ url_for('static', filename='js/jquery-3.0.0.min.js') }}"></script>
       <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+     
 
    </body>
 </html>
