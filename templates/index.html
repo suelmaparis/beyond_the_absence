@@ -112,7 +112,7 @@
       <!-- end about -->
 
 
-      <!-- dashboard-->
+ <!-- dashboard-->
      <section id="dashboard" class="pb-5 bg-light">
          <div class="container">
             <div class="col-md-12">
@@ -120,50 +120,116 @@
                   <h2>Our Reality in Data</h2>
                </div>
             </div>
+            <!-- Navigation Buttons -->
+          <div class="text-center mb-4">
+       
+            <button class="btn btn-outline-primary" onclick="showPage(1)">✨ World View</button>
+            <button class="btn btn-outline-secondary" onclick="showPage(2)">🚀 Mental Health</button>
+          </div>
+         
+          <!-- Page 1: World View -->
+          <div class="chart-page" id="page1">
             <div class="row">
-               <!-- Age Distribution -->
-               <div class="col-md-6 mb-4">
-                 <div class="card">
-                   <div class="card-body">
-                     <h5 class="card-title">Age Distribution</h5>
-                     <canvas id="ageChart"></canvas>
-                   </div>
-                 </div>
-               </div>
-         
-               <!-- Feeling Anxious -->
-               <div class="col-md-6 mb-4">
-                 <div class="card">
-                   <div class="card-body">
-                     <h5 class="card-title">Feeling Anxious</h5>
-                     <canvas id="anxiousChart"></canvas>
-                   </div>
-                 </div>
-               </div>
-         
-               <!-- Suicide Attempt -->
-               <div class="col-md-6">
-                 <div class="card">
-                   <div class="card-body">
-                     
-                     <h5 class="card-title">Suicide Attempt</h5>   
-                     <div style="height: 258px;">
-                        <canvas id="suicideChart"></canvas>
-                     </div>   
-                   </div>
-                 </div>
-               </div>
-         
-               <!-- Trouble Sleeping -->
-               <div class="col-md-6 mb-4">
-                 <div class="card">
-                   <div class="card-body">
-                     <h5 class="card-title">Trouble Sleeping at Night</h5>
-                     <canvas id="sleepChart"></canvas>
-                   </div>
-                 </div>
-               </div>
-             </div>
+              <!-- Female Population by Continent -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Female Population by Continent (%)</h5>
+                    <canvas id="femaleChart"></canvas>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Age Distribution -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Age Distribution</h5>
+                    <canvas id="ageChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <!-- Top 10 Countries -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Top 10 Countries (Women % - 2022)</h5>
+                    <canvas id="top10Chart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+
+             <!-- 2010 vs 2022 Comparison -->
+            <div class="col-md-6 mb-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">2010 vs 2022 - Female Population</h5>
+                  <canvas id="compChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <!-- Page 3: Mental Health -->
+          <div class="chart-page" id="page2" style="display:none;">
+            <div class="row">
+                          <!-- Problems of Bonding -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Problems of Bonding with Baby</h5>
+                    <canvas id="bondingChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- Feeling Anxious -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Feeling Anxious</h5>
+                    <canvas id="anxiousChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Suicide Attempt -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Suicide Attempt</h5>   
+                    <div style="height: 258px;">
+                      <canvas id="suicideChart"></canvas>
+                    </div>   
+                  </div>
+                </div>
+              </div>
+
+              <!-- Trouble Sleeping -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Trouble Sleeping at Night</h5>
+                    <canvas id="sleepChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- JS to Toggle Pages -->
+          <script>
+            function showPage(num) {
+              document.querySelectorAll('.chart-page').forEach(el => el.style.display = 'none');
+              document.getElementById('page' + num).style.display = 'block';
+            }
+          </script>
+
+            </div>
            </div>
          
            <!-- Chart JS Scripts -->
@@ -175,7 +241,7 @@
               data: {
                 labels: {{ age_labels | tojson | safe }},
                 datasets: [{
-                  label: 'Number of Mothers',
+               
                   data: {{ age_data | tojson | safe }},
                   backgroundColor: {{ age_colors | tojson | safe }},
                   borderColor: {{ age_borders | tojson | safe }},
@@ -192,7 +258,7 @@
               data: {
                 labels: {{ anxious_labels | tojson | safe }},
                 datasets: [{
-                  label: 'Responses',
+             
                   data: {{ anxious_data | tojson | safe }},
                   backgroundColor: {{ anxious_colors | tojson | safe }},
                   borderColor: {{ anxious_borders | tojson | safe }},
@@ -229,7 +295,7 @@
               data: {
                 labels: {{ sleep_labels | tojson | safe }},
                 datasets: [{
-                  label: 'Responses',
+                  
                   data: {{ sleep_data | tojson | safe }},
                   backgroundColor: {{ sleep_colors | tojson | safe }},
                   borderColor: {{ sleep_borders | tojson | safe }},
@@ -238,15 +304,109 @@
               },
               options: { responsive: true, scales: { y: { beginAtZero: true } } }
             });
+
+            //Female Population by Continent
+            const femaleCtx = document.getElementById('femaleChart').getContext('2d');
+              new Chart(femaleCtx, {
+                type: 'bar',
+                data: {
+                  labels: {{ continent_labels | tojson | safe }},
+                  datasets: [{
+                  
+                    data: {{ continent_values | tojson | safe }},
+                    backgroundColor: {{ continent_colors | tojson | safe }},
+                    borderColor: {{ continent_borders | tojson | safe }},
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  scales: {
+                    y: { beginAtZero: true }
+                  }
+                }
+              });
+             // Problems of Bonding with Baby
+            const bondingCtx = document.getElementById('bondingChart').getContext('2d');
+            new Chart(bondingCtx, {
+              type: 'bar',
+              data: {
+                labels: {{ bonding_labels | tojson | safe }},
+                datasets: [{
+                  label: 'Responses',
+                  data: {{ bonding_data | tojson | safe }},
+                  backgroundColor: {{ bonding_colors | tojson | safe }},
+                  borderColor: {{ bonding_borders | tojson | safe }},
+                  borderWidth: 1
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+              //Top 10 países com maior % de mulheres (2022)
+            const top10Ctx = document.getElementById('top10Chart').getContext('2d');
+            new Chart(top10Ctx, {
+              type: 'bar',
+              data: {
+                labels: {{ top10_labels | tojson | safe }},
+                datasets: [{
+                  label: 'Female Population %',
+                  data: {{ top10_data | tojson | safe }},
+                  backgroundColor: {{ top10_colors | tojson | safe }},
+                  borderColor: {{ top10_borders | tojson | safe }},
+                  borderWidth: 1
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+             
+            //Comparação entre 2010 e 2022 por continente (Bar side by side)
+            const compCtx = document.getElementById('compChart').getContext('2d');
+            new Chart(compCtx, {
+              type: 'bar',
+              data: {
+                labels: {{ comp_labels | tojson | safe }},
+                datasets: [
+                  {
+                    label: '2010',
+                    data: {{ data_2010 | tojson | safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                  },
+                  {
+                    label: '2022',
+                    data: {{ data_2022 | tojson | safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+              }
+            });
+
+         
+        
           </script>
-          
+
+  
+
  </section>
       
-
-      <!-- end dashboard -->
+<!-- end dashboard -->
       
-      <!-- contact section -->
+<!-- contact section -->
       <section id="contact">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="alert alert-info text-center">
+            {{ messages[0] }}
+          </div>
+        {% endif %}
+      {% endwith %}
          <div class="container">
             <div class="row">
                <div class="col-md-12">
@@ -258,14 +418,14 @@
                   <form action="/send_email" method="POST" id="request" class="main_form" style="margin-left: 10%; margin-right: 10%;">
                      <div class="row">
                         <div class="col-lg-6 col-md mb-3">
-                           <input class="contactus" placeholder="You Name" type="type" name="Name" required> 
+                           <input class="contactus" placeholder="You Name" type="text" name="Name" required> 
                         </div>
                         
                         <div class="col-lg-6 col-md mb-3">
-                           <input class="contactus" placeholder="Phone Number" type="type" name="Phone" required>                          
+                           <input class="contactus" placeholder="Phone Number" type="tel" name="Phone" required>                          
                         </div>
                         <div class="col-lg-12 col-md mb-3">
-                           <input class="contactus" placeholder="Email" type="type" name="Email" required> 
+                           <input class="contactus" placeholder="Email" type="email" name="Email" required> 
                         </div>
                         <div class="col-lg-12 mb-3">
                            <textarea class="textarea" placeholder="Message" name="Message" required></textarea>
