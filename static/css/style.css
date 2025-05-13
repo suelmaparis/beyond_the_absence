@@ -84,6 +84,11 @@ a {
      transition: all .3s ease-in-out;
 }
 
+/* centers all h2s whose id starts with "h2-" */
+h2[id^="h2-"] {
+     text-align: center;
+   }
+   
 h1,
 h2,
 h3,

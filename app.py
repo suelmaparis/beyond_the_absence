@@ -23,38 +23,35 @@ app.secret_key = 'um_valor_secreto_aqui'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 
-@app.route('/send_email', methods=['GET', 'POST'])
+@app.route('/send_email', methods=['POST'])
 def send_email():
-    if request.method == 'POST':
-        Name = request.form.get('Name', '')
-        Phone = request.form.get('Phone', '')
-        Email = request.form.get('Email', '')
-        Message = request.form.get('Message', '')
+    Name = request.form.get('Name', '')
+    Phone = request.form.get('Phone', '')
+    Email = request.form.get('Email', '')
+    Message = request.form.get('Message', '')
 
-        if not (Name and Phone and Email and Message):
-            flash('All fields are required.')
-            return redirect(url_for('index'))
-
-        try:
-            msg = MIMEText(f"New message from {Name} {Phone} <{Email}>:\n\n{Message}")
-            msg['Subject'] = 'New Message from a Mom'
-            msg['From'] = MAIL_USERNAME
-            msg['To'] = MAIL_USERNAME  # ou qualquer outro destinatário
-
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                server.starttls()
-                server.login(MAIL_USERNAME, MAIL_PASSWORD)
-                server.send_message(msg)
-
-            flash('Email sent successfully!')
-        except Exception as e:
-            print(e)
-            flash('Error sending email.')
-
+    if not (Name and Phone and Email and Message):
+        flash('All fields are required.')
         return redirect(url_for('index'))
-    else:
-        return redirect(url_for('index'))
-    
+
+    try:
+        msg = MIMEText(f"New message from {Name} ({Phone}) <{Email}>:\n\n{Message}")
+        msg['Subject'] = 'New Message from a Mom'
+        msg['From'] = MAIL_USERNAME
+        msg['To'] = MAIL_USERNAME  # send to yourself
+
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.send_message(msg)
+
+        flash('Email sent successfully!')
+    except Exception as e:
+        print("Email sending error:", e)
+        flash('Error sending email. Please try again.')
+
+    return redirect(url_for('index'))
+
 @app.route('/')
 def index():
     from country_continent_map import country_continent_map
