@@ -41,6 +41,7 @@
          <a href="#dashboard">Dashboard</a>
          <a href="#Support">Mom support</a>
          <a href="#contact">Contact</a>
+         <a class="nav-link" href="{{ url_for('blog') }}">Blog</a>
       </div>
       <!-- header -->
       <header>
@@ -104,7 +105,9 @@
                </div>
                <div class="col-md-6">
                   <div class="about_img">
-                     <figure><img class="img_responsive" src="{{url_for('static', filename='images/about_img.png')}}" alt="#"/></figure>
+                    <figure>
+                      <img class="img_responsive" src="{{url_for('static', filename='images/about_img.png')}}" alt="#" style="max-width: 450px; width: 100%;">
+                    </figure>
                   </div>
                </div>
             </div>

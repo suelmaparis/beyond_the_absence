@@ -1,10 +1,11 @@
 import pandas as pd
-#import seaborn as sns
 import os
 import smtplib
 import random
 from flask import Flask, render_template, request, flash, redirect, url_for
 from email.mime.text import MIMEText
+
+from models import db, BlogPost, Comment
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -18,6 +19,7 @@ app = Flask(__name__)
 app.secret_key = 'um_valor_secreto_aqui'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+db.init_app(app)
 
 @app.route('/send_email', methods=['POST'])
 def send_email():
@@ -170,3 +172,24 @@ def index():
     comp_colors=comp_colors,
 
 )
+
+@app.route('/blog')
+def blog():
+    posts = BlogPost.query.order_by(BlogPost.date.desc()).all()
+    return render_template('blog.html', posts=posts)
+
+@app.route('/like/<int:post_id>', methods=['POST'])
+def like(post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    post.likes += 1
+    db.session.commit()
+    return redirect(url_for('blog'))
+
+@app.route('/comment/<int:post_id>', methods=['POST'])
+def comment(post_id):
+    name = request.form['name']
+    text = request.form['text']
+    new_comment = Comment(post_id=post_id, name=name, text=text)
+    db.session.add(new_comment)
+    db.session.commit()
+    return redirect(url_for('blog'))
