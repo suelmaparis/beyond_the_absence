@@ -1,54 +1,85 @@
-Beyond the Absence — Single Moms Data Dashboard
+# Beyond the Absence — Single Moms Data Platform
 
-📊 Project Overview
+## 💜 I built this as a single mom, for other single moms.
 
-This project aims to analyze and visualize data related to single mothers, focusing on postpartum depression and child health development. The goal is to raise awareness and provide insights through a clean, interactive dashboard.
+**Beyond the Absence** is now live.  
+It’s a platform where our stories are seen.  
+Where real data meets real pain.  
+Where motherhood without support finds voice, strength, and direction.
 
-🏗️ Project Structure
+🖥️ [Visit the Site](https://beyond-the-absence.onrender.com)  
+🎙️ Listen to the podcast  
+📊 Explore the dashboard  
+🤝 Find resources  
+💬 Share your story
 
-Backend: Python + Flask
-Frontend: HTML, CSS, Flask templates (Jinja2)
-Data Visualization: Pandas, Matplotlib, Seaborn (and/or Plotly)
-Database: Cleaned CSV files merged from multiple datasets
-📂 Data Cleaning & Preprocessing
+> I hope it reaches the women who need it.  
+> I hope it reminds you that you’re not invisible.
 
-We merged two main datasets:
+---
 
-Postpartum Depression Data (postpartum_depression.csv)
-Child Health Development Data (child_health_development.csv)
-Main cleaning steps:
-✅ Renamed columns for consistency (e.g., Age → age)
-✅ Dropped missing values (NaN)
-✅ Converted age ranges (like '35-40') into numeric averages
-✅ Split combined Timestamp into two columns:
+## 📊 Project Overview
 
-date → stored as datetime.date
-time → stored as datetime.time
-✅ Removed non-numeric or text columns when computing correlations
-✅ Saved the final cleaned and merged dataset as single_mom_dataset.csv
-📊 Dashboard Features
+This project analyzes and visualizes data related to **single mothers**, focusing on postpartum depression, mental health, and child development.  
+It also gives space for real stories, reflections, and community support.
 
-Correlation heatmaps between variables
-Summary statistics (mean, median, std deviation)
-Interactive plots showing trends by age, marital status, and other factors
-Insights into postpartum mental health and child outcomes
-⚙️ How to Run the App
+The goal is to combine **data science** and **lived experience** into one accessible platform for single moms everywhere.
+
+---
+
+## 🏗️ Tech Stack
+
+- **Backend:** Python + Flask  
+- **Frontend:** HTML, CSS, Bootstrap, Flask templates (Jinja2)  
+- **Data Visualization:** Pandas, Plotly, Matplotlib  
+- **Database:** Cleaned and merged CSV datasets  
+- **Deployment:** Render  
+- **Analytics:** Google Analytics (`G-3L8D1R8RQG`) for visitor tracking
+
+---
+
+## 📂 Data Cleaning & Preprocessing
+
+We merged and cleaned two main datasets:
+
+- `postpartum_depression.csv`
+- `child_health_development.csv`
+
+Main preprocessing steps:
+
+- ✅ Renamed columns for consistency (e.g., `Age → age`)
+- ✅ Converted age ranges into numeric averages
+- ✅ Dropped rows with missing values (`NaN`)
+- ✅ Split timestamps into `date` and `time`
+- ✅ Removed irrelevant text columns for clean correlation
+- ✅ Saved the final dataset as `single_mom_dataset.csv`
+
+---
+
+## 📊 Dashboard Features
+
+- Correlation heatmaps between mental health and child outcomes  
+- Summary statistics (mean, median, std deviation)  
+- Interactive charts grouped by age, marital status, and emotional indicators  
+- Health and anxiety indicators in postpartum moms  
+- World View section with global comparison (2010 vs 2022)
+
+---
+
+## ✍️ New Features
+
+- ✅ **Blog system**: built-in blog section with real stories, milestones, and mother-to-mother encouragement  
+- ✅ **Likes and comments**: users can interact with posts and share experiences  
+- ✅ **Email submission**: mothers can share their own stories securely  
+- ✅ **Google Analytics**: added tracking to measure site reach and impact  
+- ✅ **Podcast integration**: linked episodes to themes and content
+
+---
+
+## ⚙️ How to Run the App Locally
 
 1️⃣ Clone the repository:
 
+```bash
 git clone https://github.com/yourusername/beyond-the-absence.git
 cd beyond-the-absence
-2️⃣ Install dependencies:
-
-pip install -r requirements.txt
-3️⃣ Run the Flask app:
-
-python app.py
-4️⃣ Open in your browser:
-
-http://127.0.0.1:5000/
-✨ About
-
-Created by Suelma Paris as part of the Beyond the Absence podcast and project, empowering and giving voice to single mothers.
-This project blends data science, storytelling, and advocacy to shed light on invisible challenges.
-
