@@ -185,6 +185,16 @@ a,
      transition: all .3s ease-in-out;
 }
 
+.btn {
+     border: 2px solid #333 !important;
+     font-weight: 600;
+     padding: 10px 20px;
+     margin: 5px;
+     border-radius: 6px;
+     background-color: white;
+     transition: 0.3s ease;
+   }
+ 
 img {
      max-width: 100%;
      height: auto;
@@ -739,3 +749,16 @@ button:not(:disabled),
    .mt-2 {
      margin-top: 0.5rem !important;
    } 
+
+
+  .filter-btn {
+    border: 2px solid #333 !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 6px;
+    background-color: white;
+    transition: 0.3s ease;
+  }
+
+
