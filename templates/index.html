@@ -953,12 +953,11 @@
     </div>
   </div>
 
-  <script>
-              function filterCards(category) {
-          // Oculta apenas os títulos e linhas que fazem parte do bloco de suporte
-          const titles = document.querySelectorAll('h2[id^="h2-"]'); // só h2 com id começando com "h2-"
+      <script>
+        function filterCards(category, scroll = true) {
+          const titles = document.querySelectorAll('h2[id^="h2-"]');
           const rows = document.querySelectorAll('h2[id^="h2-"] + .row');
-
+      
           titles.forEach(title => title.style.display = 'none');
           rows.forEach(row => {
             row.style.display = 'none';
@@ -966,25 +965,32 @@
               card.style.display = 'none';
             });
           });
-
-          // Mostra apenas a seção da categoria clicada
+      
           const activeTitle = document.getElementById(`h2-${category.toLowerCase()}`);
           const activeRow = activeTitle?.nextElementSibling;
-
+      
           if (activeTitle && activeRow) {
             activeTitle.style.display = 'block';
-            activeRow.style.display = 'flex'; // ou 'block' para colunas verticais
-
+            activeRow.style.display = 'flex';
+      
             activeRow.querySelectorAll(`.resource-card[data-category="${category}"]`).forEach(card => {
               card.style.display = 'block';
             });
-
-            activeTitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+            // só rola se scroll for true
+            if (scroll) {
+              activeTitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
           }
         }
-
-  </script>
-   
+      </script>
+  
+    <script>
+      window.onload = function() {
+        filterCards('Health', false);
+      };
+    </script>
+    
     <style>
       h2[id^="h2-"],
       h2[id^="h2-"] + .row {
