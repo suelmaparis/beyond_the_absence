@@ -38,7 +38,7 @@ def send_email():
         msg['From'] = MAIL_USERNAME
         msg['To'] = MAIL_USERNAME  # send to yourself
 
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        with smtplib.SMTP('mail.privateemail.com', 587) as server:
             server.starttls()
             server.login(MAIL_USERNAME, MAIL_PASSWORD)
             server.send_message(msg)
