@@ -4,22 +4,54 @@ import smtplib
 import random
 from flask import Flask, render_template, request, flash, redirect, url_for
 from email.mime.text import MIMEText
+from flask_login import login_user, logout_user, login_required
+from flask_admin import Admin, AdminIndexView, expose
+from flask_admin.contrib.sqla import ModelView
+from flask_login import current_user
+from werkzeug.security import check_password_hash
 
-from models import db, BlogPost, Comment
+from flask_migrate import Migrate
+
+
+from models import db, BlogPost, Comment, User, Resource
+from flask_login import LoginManager
 
 from dotenv import load_dotenv
 load_dotenv()
+
 
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
 app = Flask(__name__)
 
+migrate = Migrate(app, db)
 
 app.secret_key = 'um_valor_secreto_aqui'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 db.init_app(app)
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'  
+
+class AuthModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+class MyAdminIndexView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        return super().index()
+
+admin = Admin(app, name='Beyond Admin', template_mode='bootstrap4', index_view=MyAdminIndexView())
+admin.add_view(AuthModelView(Resource, db.session))
+admin.add_view(AuthModelView(BlogPost, db.session))
+
 
 @app.route('/send_email', methods=['POST'])
 def send_email():
@@ -193,3 +225,25 @@ def comment(post_id):
     db.session.add(new_comment)
     db.session.commit()
     return redirect(url_for('blog'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user = User.query.filter_by(username=request.form['username']).first()
+        if user and check_password_hash(user.password, request.form['password']):
+            login_user(user)
+            return redirect('/admin')
+        else:
+            flash('Invalid username or password')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
