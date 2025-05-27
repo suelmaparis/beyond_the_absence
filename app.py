@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import smtplib
 import random
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify
 from email.mime.text import MIMEText
 from flask_login import login_user, logout_user, login_required
 from flask_admin import Admin, AdminIndexView, expose
@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash
 from flask_migrate import Migrate
 
 
-from models import db, BlogPost, Comment, User, Resource
+from models import db, BlogPost, Comment, User, Resource, Question, Tip, CheckIn
 from flask_login import LoginManager
 
 from dotenv import load_dotenv
@@ -51,6 +51,95 @@ class MyAdminIndexView(AdminIndexView):
 admin = Admin(app, name='Beyond Admin', template_mode='bootstrap4', index_view=MyAdminIndexView())
 admin.add_view(AuthModelView(Resource, db.session))
 admin.add_view(AuthModelView(BlogPost, db.session))
+admin.add_view(AuthModelView(Question, db.session))
+admin.add_view(AuthModelView(Tip, db.session))
+
+def get_dashboard_data():
+    from country_continent_map import country_continent_map
+
+    df_world = pd.read_csv('db/mom_world_dataset.csv', skiprows=4)
+
+    excluidos = [
+        'Africa Eastern and Southern', 'Africa Western and Central', 'Arab World',
+        'World', 'High income', 'Low income', 'Upper middle income',
+        'Lower middle income', 'Low & middle income', 'OECD members',
+        'Fragile and conflict affected situations', 'Latin America & Caribbean',
+        'Sub-Saharan Africa', 'Europe & Central Asia', 'Middle East & North Africa',
+        'South Asia', 'East Asia & Pacific'
+    ]
+    df_world = df_world[~df_world['Country Name'].isin(excluidos)]
+    df_world['Continent'] = df_world['Country Name'].map(country_continent_map)
+    df_world = df_world.dropna(subset=['Continent', '2022'])
+
+    continent_group = df_world.groupby('Continent')['2022'].mean().round(2)
+    continent_labels = continent_group.index.tolist()
+    continent_values = continent_group.values.tolist()
+
+    df_moms = pd.read_csv('db/single_mom_dataset.csv')
+
+    def random_color():
+        return f"rgba({random.randint(0,255)}, {random.randint(0,255)}, {random.randint(0,255)}, 0.5)"
+    def generate_colors(n):
+        bg = [random_color() for _ in range(n)]
+        border = [color.replace('0.5', '1') for color in bg]
+        return bg, border
+
+    age_labels, age_data, age_colors, age_borders = [], [], [], []
+    if 'age' in df_moms.columns:
+        df_moms = df_moms.dropna(subset=['age'])
+        df_moms['age'] = df_moms['age'].astype(int)
+        age_counts = df_moms['age'].value_counts().sort_index()
+        age_labels = age_counts.index.tolist()
+        age_data = age_counts.values.tolist()
+        age_colors, age_borders = generate_colors(len(age_labels))
+
+    anxious_counts = df_moms['Feeling anxious'].value_counts()
+    anxious_labels = anxious_counts.index.tolist()
+    anxious_data = anxious_counts.values.tolist()
+    anxious_colors, anxious_borders = generate_colors(len(anxious_labels))
+
+    suicide_counts = df_moms['Suicide attempt'].value_counts()
+    suicide_labels = suicide_counts.index.tolist()
+    suicide_data = suicide_counts.values.tolist()
+    suicide_colors, _ = generate_colors(len(suicide_labels))
+
+    sleep_counts = df_moms['Trouble sleeping at night'].value_counts()
+    sleep_labels = sleep_counts.index.tolist()
+    sleep_data = sleep_counts.values.tolist()
+    sleep_colors, sleep_borders = generate_colors(len(sleep_labels))
+
+    bonding_counts = df_moms['Problems of bonding with baby'].value_counts()
+    bonding_labels = bonding_counts.index.tolist()
+    bonding_data = bonding_counts.values.tolist()
+    bonding_colors, bonding_borders = generate_colors(len(bonding_labels))
+
+    top10_df = df_world[['Country Name', '2022']].dropna().sort_values(by='2022', ascending=False).head(10)
+    top10_labels = top10_df['Country Name'].tolist()
+    top10_data = top10_df['2022'].tolist()
+    top10_colors, top10_borders = generate_colors(len(top10_labels))
+
+    if '2010' in df_world.columns:
+        comparison_df = df_world.dropna(subset=['2010', '2022'])
+        comp_group = comparison_df.groupby('Continent')[['2010', '2022']].mean().round(2)
+        comp_labels = comp_group.index.tolist()
+        data_2010 = comp_group['2010'].tolist()
+        data_2022 = comp_group['2022'].tolist()
+        comp_colors, _ = generate_colors(len(comp_labels))
+    else:
+        comp_labels, data_2010, data_2022, comp_colors = [], [], [], []
+
+    continent_colors, continent_borders = generate_colors(len(continent_labels))
+
+    return dict(
+        age_labels=age_labels, age_data=age_data, age_colors=age_colors, age_borders=age_borders,
+        anxious_labels=anxious_labels, anxious_data=anxious_data, anxious_colors=anxious_colors, anxious_borders=anxious_borders,
+        suicide_labels=suicide_labels, suicide_data=suicide_data, suicide_colors=suicide_colors,
+        sleep_labels=sleep_labels, sleep_data=sleep_data, sleep_colors=sleep_colors, sleep_borders=sleep_borders,
+        bonding_labels=bonding_labels, bonding_data=bonding_data, bonding_colors=bonding_colors, bonding_borders=bonding_borders,
+        continent_labels=continent_labels, continent_values=continent_values, continent_colors=continent_colors, continent_borders=continent_borders,
+        top10_labels=top10_labels, top10_data=top10_data, top10_colors=top10_colors, top10_borders=top10_borders,
+        comp_labels=comp_labels, data_2010=data_2010, data_2022=data_2022, comp_colors=comp_colors
+    )
 
 
 @app.route('/send_email', methods=['POST'])
@@ -84,126 +173,63 @@ def send_email():
 
 @app.route('/')
 def index():
-    from country_continent_map import country_continent_map
-   
-    # ===== 1. CARREGAR DADOS MUNDIAIS =====
-    df_world = pd.read_csv('db/mom_world_dataset.csv', skiprows=4)
+    dashboard_data = get_dashboard_data()
 
-    excluidos = [
-        'Africa Eastern and Southern', 'Africa Western and Central', 'Arab World',
-        'World', 'High income', 'Low income', 'Upper middle income',
-        'Lower middle income', 'Low & middle income', 'OECD members',
-        'Fragile and conflict affected situations', 'Latin America & Caribbean',
-        'Sub-Saharan Africa', 'Europe & Central Asia', 'Middle East & North Africa',
-        'South Asia', 'East Asia & Pacific'
-    ]
-    df_world = df_world[~df_world['Country Name'].isin(excluidos)]
-    df_world['Continent'] = df_world['Country Name'].map(country_continent_map)
-    df_world = df_world.dropna(subset=['Continent', '2022'])
+    resources = Resource.query.all()
+    category_labels = {
+        'Health': '🏥 Health Services and Prenatal Care',
+        'Mental': '🤱 Support Groups & Mental Health',
+        'Housing': '🏠 Housing Assistance & Shelters',
+        'Resources': '🍎 Material & Logistic & Food Support',
+        'Jobs': '💼 Employment & Job Readiness',
+        'Legal': '⚖️ Legal Aid Services'
+    }
 
-    continent_group = df_world.groupby('Continent')['2022'].mean().round(2)
-    continent_labels = continent_group.index.tolist()
-    continent_values = continent_group.values.tolist()
+    return render_template('index.html', 
+        resources=resources,
+        category_labels=category_labels,
+        **dashboard_data
+    )
 
-    # ===== 2. CARREGAR DADOS DAS MÃES =====
-    df_moms = pd.read_csv('db/single_mom_dataset.csv')
+@app.route('/checkin', methods=['POST'])
+def checkin():
+    from sqlalchemy.sql import func
 
-    def random_color():
-        return f"rgba({random.randint(0,255)}, {random.randint(0,255)}, {random.randint(0,255)}, 0.5)"
-    def generate_colors(n):
-        bg = [random_color() for _ in range(n)]
-        border = [color.replace('0.5', '1') for color in bg]
-        return bg, border
+    data = request.get_json()
+    mood = data.get("mood")
+    user_agent = request.headers.get('User-Agent', 'anonymous')
 
-    # AGE
-    if 'age' in df_moms.columns:
-        df_moms = df_moms.dropna(subset=['age'])
-        df_moms['age'] = df_moms['age'].astype(int)
-        age_counts = df_moms['age'].value_counts().sort_index()
-        age_labels = age_counts.index.tolist()
-        age_data = age_counts.values.tolist()
-        age_colors, age_borders = generate_colors(len(age_labels))
-    else:
-        age_labels, age_data, age_colors, age_borders = [], [], [], []
+    tips = []
+    suggested_resources = []
 
-    # FEELING ANXIOUS
-    anxious_counts = df_moms['Feeling anxious'].value_counts()
-    anxious_labels = anxious_counts.index.tolist()
-    anxious_data = anxious_counts.values.tolist()
-    anxious_colors, anxious_borders = generate_colors(len(anxious_labels))
+    if mood:
+        checkin = CheckIn(mood=mood, user_agent=user_agent)
+        db.session.add(checkin)
+        db.session.commit()
 
-    # SUICIDE ATTEMPT
-    suicide_counts = df_moms['Suicide attempt'].value_counts()
-    suicide_labels = suicide_counts.index.tolist()
-    suicide_data = suicide_counts.values.tolist()
-    suicide_colors, _ = generate_colors(len(suicide_labels))
+        tips_objs = Tip.query.filter_by(category=mood).order_by(func.random()).limit(3).all()
+        tips = [tip.message for tip in tips_objs]
 
-    # TROUBLE SLEEPING
-    sleep_counts = df_moms['Trouble sleeping at night'].value_counts()
-    sleep_labels = sleep_counts.index.tolist()
-    sleep_data = sleep_counts.values.tolist()
-    sleep_colors, sleep_borders = generate_colors(len(sleep_labels))
+        category_map = {
+            "anxious": "Mental",
+            "depressed": "Mental",
+            "no_food": "Resources",
+            "tired": "Health",
+            "low_self_esteem": "Health"
+        }
+        category = category_map.get(mood)
+        if category:
+            resources = Resource.query.filter_by(category=category).limit(4).all()
+            suggested_resources = [{
+                "title": r.title,
+                "description": r.description,
+                "address": r.address,
+                "phone": r.phone,
+                "website": r.website,
+                "category": r.category
+            } for r in resources]
 
-    # PROBLEMS OF BONDING
-    bonding_counts = df_moms['Problems of bonding with baby'].value_counts()
-    bonding_labels = bonding_counts.index.tolist()
-    bonding_data = bonding_counts.values.tolist()
-    bonding_colors, bonding_borders = generate_colors(len(bonding_labels))
-
-    #Top 10 países com maior % de mulheres (2022)
-    top10_df = df_world[['Country Name', '2022']].dropna().sort_values(by='2022', ascending=False).head(10)
-    top10_labels = top10_df['Country Name'].tolist()
-    top10_data = top10_df['2022'].tolist()
-    top10_colors, top10_borders = generate_colors(len(top10_labels))
-   
-    #Comparação entre 2010 e 2022 por continente (Bar 
-    if '2010' in df_world.columns:
-        comparison_df = df_world.dropna(subset=['2010', '2022'])
-        comp_group = comparison_df.groupby('Continent')[['2010', '2022']].mean().round(2)
-        comp_labels = comp_group.index.tolist()
-        data_2010 = comp_group['2010'].tolist()
-        data_2022 = comp_group['2022'].tolist()
-        comp_colors, _ = generate_colors(len(comp_labels))
-
-    continent_colors, continent_borders = generate_colors(len(continent_labels))
- 
-
-
-    # ===== 3. ENVIAR PARA TEMPLATE =====
-    return render_template('index.html',
-    age_labels=age_labels, age_data=age_data,
-    age_colors=age_colors, age_borders=age_borders,
-
-    anxious_labels=anxious_labels, anxious_data=anxious_data,
-    anxious_colors=anxious_colors, anxious_borders=anxious_borders,
-
-    suicide_labels=suicide_labels, suicide_data=suicide_data,
-    suicide_colors=suicide_colors,
-
-    sleep_labels=sleep_labels, sleep_data=sleep_data,
-    sleep_colors=sleep_colors, sleep_borders=sleep_borders,
-
-    bonding_labels=bonding_labels,
-    bonding_data=bonding_data,
-    bonding_colors=bonding_colors,
-    bonding_borders=bonding_borders,
-
-    continent_labels=continent_labels,
-    continent_values=continent_values,
-    continent_colors=continent_colors,
-    continent_borders=continent_borders,
-
-    top10_labels=top10_labels,
-    top10_data=top10_data,
-    top10_colors=top10_colors,
-    top10_borders=top10_borders,
-
-    comp_labels=comp_labels,
-    data_2010=data_2010,
-    data_2022=data_2022,
-    comp_colors=comp_colors,
-
-)
+    return jsonify({"tips": tips, "resources": suggested_resources})
 
 @app.route('/blog')
 def blog():
@@ -246,4 +272,9 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/api/questions')
+def get_questions():
+    questions = Question.query.all()
+    return jsonify([{'id': q.id, 'text': q.text, 'category': q.category} for q in questions])
 

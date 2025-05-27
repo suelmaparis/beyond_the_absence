@@ -765,4 +765,8 @@ button:not(:disabled),
     transition: 0.3s ease;
   }
 
-
+  .checkin-box {
+     background-color: #ffffff;
+     border-radius: 16px;
+     box-shadow: 0 0 12px rgba(0,0,0,0.08);
+   }
