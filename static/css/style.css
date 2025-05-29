@@ -770,3 +770,36 @@ button:not(:disabled),
      border-radius: 16px;
      box-shadow: 0 0 12px rgba(0,0,0,0.08);
    }
+
+   #question-form {
+     background-color: #fff;
+     border: 2px solid #f3f4f6;
+   }
+   
+   #question-form h5 {
+     font-family: 'Poppins', sans-serif;
+     color: #5f4b8b;
+   }
+   
+   #question-group p {
+     font-size: 1rem;
+     color: #333;
+   }
+   
+   .form-check-label {
+     margin-left: 4px;
+     font-weight: 500;
+   }
+   
+   .btn-outline-primary {
+     border-radius: 2rem;
+     font-weight: 600;
+     transition: 0.3s;
+   }
+   
+   .btn-outline-primary:hover {
+     background-color: #5f4b8b;
+     color: #fff;
+     border-color: #5f4b8b;
+   }
+   

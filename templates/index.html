@@ -125,45 +125,51 @@
 
       <!-- COLUNA CHECK-IN -->
       <div class="col-md-6 d-flex align-items-stretch">
-  <div class="checkin-box p-4 shadow rounded bg-light w-100" id="checkin-app">
-    <div id="checkin-intro" class="text-center">
-      <h4 class="mb-3">🧡 How are you feeling today?</h4>
-      <p>Let us know how you're doing, and we’ll share personalized tips for you.</p>
-
-      <div class="mb-4">
-        <label for="mood" class="form-label">Select your current feeling:</label>
-        <select class="form-select" name="mood" id="mood" required>
-          <option value="">Select one...</option>
-          <option value="anxious">Anxious or overwhelmed</option>
-          <option value="depressed">Sad or hopeless</option>
-          <option value="no_food">No food at home</option>
-          <option value="tired">Tired and sore</option>
-          <option value="low_self_esteem">Don't like my body</option>
-        </select>
+        <div class="checkin-box p-4 shadow rounded bg-light w-100" id="checkin-app">
+      
+          <!-- Etapa 1: Humor -->
+          <div id="checkin-intro" class="text-center">
+            <h4 class="mb-3">🧡 How are you feeling today?</h4>
+            <p>Let us know how you're doing, and we’ll share personalized tips for you.</p>
+      
+            <div class="mb-4">
+              <label for="mood" class="form-label">Select your current feeling:</label>
+              <select class="form-select" name="mood" id="mood" required>
+                <option value="">Select one...</option>
+                <option value="anxious">Anxious or overwhelmed</option>
+                <option value="depressed">Sad or hopeless</option>
+                <option value="no_food">No food at home</option>
+                <option value="tired">Tired and sore</option>
+                <option value="low_self_esteem">Don't like my body</option>
+              </select>
+            </div>
+          </div>
+      
+          <!-- Etapa 2: Perguntas -->
+          <div id="checkin-question" class="d-none">
+            <form id="question-form" class="p-4 bg-white rounded shadow-sm border">
+              <h5 class="text-center mb-4 text-primary fw-bold">✨ Answer a few questions</h5>
+              <div id="question-group" class="mb-4"></div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-lg btn-outline-primary px-4">Next</button>
+              </div>
+            </form>
+          </div>
+      
+          <!-- Etapa 3: Resultados -->
+          <div id="checkin-results" class="d-none mt-4">
+            <h5 class="text-center">💡 Your Personalized Tips:</h5>
+            <ul id="tips-list" class="list-group mt-3"></ul>
+      
+            <div id="resources-list" class="mt-4">
+              <h5 class="text-center">💼 Recommended Resources for You:</h5>
+              <div class="row" id="resource-cards"></div>
+            </div>
+          </div>
+      
+        </div>
       </div>
-
-      <button class="btn btn-primary" onclick="startCheckin()">Get My Tips</button>
-    </div>
-
-    <div id="checkin-question" class="d-none text-center">
-      <h5 id="question-text" class="mb-4"></h5>
-      <div>
-        <button class="btn btn-outline-success me-2" onclick="submitAnswer('yes')">Yes</button>
-        <button class="btn btn-outline-danger" onclick="submitAnswer('no')">No</button>
-      </div>
-    </div>
-
-    <div id="checkin-results" class="d-none mt-4">
-      <h5 class="text-center">💡 Your Personalized Tips:</h5>
-      <ul id="tips-list" class="list-group mt-3"></ul>
-
-      <div id="resources-list" class="mt-4">
-        <h5 class="text-center">💼 Recommended Resources for You:</h5>
-        <div class="row" id="resource-cards"></div>
-      </div>
-    </div>
-  </div>
-</div>
+      
     </div>
   </div>
 </section>
@@ -171,42 +177,73 @@
 <script>
   let questions = [];
   let currentIndex = 0;
+  let groupSize = 4;
   let answers = {};
 
-  async function startCheckin() {
-    const mood = document.getElementById("mood").value;
-    if (!mood) {
-      alert("Please select how you’re feeling.");
-      return;
+  document.getElementById("mood").addEventListener("change", async function () {
+    const mood = this.value;
+    if (mood) {
+      await startCheckin(mood);
     }
+  });
 
+  async function startCheckin(mood) {
     answers["mood"] = mood;
 
     const res = await fetch('/api/questions');
     questions = await res.json();
-    if (questions.length === 0) return;
+
+    if (!questions || questions.length === 0) {
+      alert("No questions available.");
+      return;
+    }
 
     document.getElementById('checkin-intro').classList.add('d-none');
     document.getElementById('checkin-question').classList.remove('d-none');
-    showQuestion();
+    showQuestionGroup();
   }
 
-  function showQuestion() {
-    const q = questions[currentIndex];
-    document.getElementById('question-text').innerText = q.text;
+  function showQuestionGroup() {
+    const groupContainer = document.getElementById('question-group');
+    groupContainer.innerHTML = '';
+
+    const end = Math.min(currentIndex + groupSize, questions.length);
+    for (let i = currentIndex; i < end; i++) {
+      const q = questions[i];
+      const block = document.createElement('div');
+      block.className = "p-3 mb-3 border rounded bg-light";
+
+      block.innerHTML = `
+        <p class="fw-semibold mb-2">${q.text}</p>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="q${q.id}" value="yes" required>
+          <label class="form-check-label">Yes</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="q${q.id}" value="no" required>
+          <label class="form-check-label">No</label>
+        </div>
+      `;
+      groupContainer.appendChild(block);
+    }
   }
 
-  async function submitAnswer(value) {
-    const qId = questions[currentIndex].id;
-    answers[`q${qId}`] = value;
+  document.getElementById("question-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-    currentIndex++;
+    const formData = new FormData(e.target);
+    for (let [key, value] of formData.entries()) {
+      answers[key] = value;
+    }
+
+    currentIndex += groupSize;
+
     if (currentIndex < questions.length) {
-      showQuestion();
+      showQuestionGroup();
     } else {
       await sendAnswers();
     }
-  }
+  });
 
   async function sendAnswers() {
     const res = await fetch('/checkin', {
@@ -216,10 +253,10 @@
     });
 
     const data = await res.json();
+
     document.getElementById('checkin-question').classList.add('d-none');
     document.getElementById('checkin-results').classList.remove('d-none');
 
-    // Mostrar dicas
     const tipsList = document.getElementById('tips-list');
     tipsList.innerHTML = '';
     data.tips.forEach(tip => {
@@ -229,7 +266,6 @@
       tipsList.appendChild(li);
     });
 
-    // Mostrar cards
     const cardsContainer = document.getElementById('resource-cards');
     cardsContainer.innerHTML = '';
     data.resources.forEach(res => {
@@ -252,6 +288,9 @@
     });
   }
 </script>
+
+
+
 
 <!-- end about -->
 
