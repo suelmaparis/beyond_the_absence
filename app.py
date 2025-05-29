@@ -193,37 +193,43 @@ def index():
 
 @app.route('/checkin', methods=['POST'])
 def checkin():
+    from sqlalchemy.sql import func
+
     data = request.get_json()
+    mood = data.get("mood")
+    user_agent = request.headers.get('User-Agent', 'anonymous')
 
-    mood = data.get('mood')
     tips = []
-    resources = []
+    suggested_resources = []
 
-    # Exemplo simples — personalize conforme suas regras
-    if mood == 'tired':
-        tips.append("Try to rest for 10 minutes if possible.")
-        resources.append({
-            "title": "Free Nap Rooms",
-            "description": "Quiet spaces for moms to rest.",
-            "address": "456 Peaceful Lane",
-            "phone": "555-REST",
-            "website": "https://nap.example.com"
-        })
+    if mood:
+        checkin = CheckIn(mood=mood, user_agent=user_agent)
+        db.session.add(checkin)
+        db.session.commit()
 
-    if mood == 'no_food':
-        tips.append("Don't be afraid to ask for help — you're not alone.")
-        resources.append({
-            "title": "Emergency Food Program",
-            "description": "Get free groceries and baby food.",
-            "address": "789 Community Dr",
-            "phone": "555-FOOD",
-            "website": "https://foodhelp.example.com"
-        })
+        tips_objs = Tip.query.filter_by(category=mood).order_by(func.random()).limit(3).all()
+        tips = [tip.message for tip in tips_objs]
 
-    return jsonify({
-        "tips": tips,
-        "resources": resources
-    })
+        category_map = {
+            "anxious": "Mental",
+            "depressed": "Mental",
+            "no_food": "Resources",
+            "tired": "Health",
+            "low_self_esteem": "Health"
+        }
+        category = category_map.get(mood)
+        if category:
+            resources = Resource.query.filter_by(category=category).limit(4).all()
+            suggested_resources = [{
+                "title": r.title,
+                "description": r.description,
+                "address": r.address,
+                "phone": r.phone,
+                "website": r.website,
+                "category": r.category
+            } for r in resources]
+
+    return jsonify({"tips": tips, "resources": suggested_resources})
 
 @app.route('/blog')
 def blog():
