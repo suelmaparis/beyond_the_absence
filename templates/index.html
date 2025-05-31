@@ -308,6 +308,8 @@
        
             <button class="btn btn-outline-primary" onclick="showPage(1)">✨ World View</button>
             <button class="btn btn-outline-secondary" onclick="showPage(2)">🚀 Mental Health</button>
+            <button class="btn btn-outline-info" onclick="showPage(3)">🧩 Special Needs & Education</button>
+
           </div>
          
           <!-- Page 1: World View -->
@@ -356,7 +358,7 @@
           </div>
           </div>
 
-          <!-- Page 3: Mental Health -->
+          <!-- Page 2: Mental Health -->
           <div class="chart-page" id="page2" style="display:none;">
             <div class="row">
                           <!-- Problems of Bonding -->
@@ -403,6 +405,53 @@
               </div>
             </div>
           </div>
+      
+          <!--Page3: special needs and education-->
+          <div class="chart-page" id="page3" style="display:none;">
+            <div class="row">
+
+             <!-- Gráfico 1 -->
+              <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title">School Access by Location (Urban vs Rural)</h5>
+                    <canvas id="accessDiffChart" ></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gráfico 2 -->
+              <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title">Avg. School Access: By Gender </h5>
+                    <canvas id="genderChart" ></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gráfico 3 -->
+              <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title">Lowest 10 Regions – Access with Difficulties</h5>
+                    <canvas id="lowestAccessChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gráfico 4 -->
+              <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title">School Access (Children with Difficulties) by Development Status</h5>
+                    <canvas id="devRegionChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
 
           <!-- JS to Toggle Pages -->
           <script>
@@ -411,10 +460,6 @@
               document.getElementById('page' + num).style.display = 'block';
             }
           </script>
-
-            </div>
-           </div>
-         
            <!-- Chart JS Scripts -->
            <script>
             // Age Chart
@@ -552,15 +597,15 @@
                   {
                     label: '2010',
                     data: {{ data_2010 | tojson | safe }},
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: {{ top10_colors | tojson | safe }},
+                    borderColor: {{ top10_borders | tojson | safe }},
                     borderWidth: 1
                   },
                   {
                     label: '2022',
                     data: {{ data_2022 | tojson | safe }},
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: {{ top10_colors | tojson | safe }},
+                    borderColor: {{ top10_borders | tojson | safe }},
                     borderWidth: 1
                   }
                 ]
@@ -571,9 +616,80 @@
               }
             });
 
-         
-        
-          </script>
+                        // 1. Média global - dificuldades vs. sem
+                const accessDiffChart = new Chart(document.getElementById('accessDiffChart'), {
+                type: 'bar',
+                data: {
+                  labels: ['Urban', 'Rural'],
+                  datasets: [{
+                    label: 'Average %',
+                    data: [{{ avg_urban }}, {{ avg_rural }}],
+                    backgroundColor: {{ top10_colors | tojson | safe }},
+                    borderColor: {{ top10_borders | tojson | safe }},
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  scales: { y: { beginAtZero: true, max: 100 } }
+                }
+              });
+
+
+                    // 2. Gênero
+        const genderChart = new Chart(document.getElementById('genderChart'), {
+          type: 'bar',
+          data: {
+            labels: {{ special_labels | tojson | safe }},
+            datasets: [{
+              label: 'Average %',
+              data: {{ special_values | tojson | safe }},
+              backgroundColor: {{ top10_colors | tojson | safe }},
+              borderColor: {{ top10_borders | tojson | safe }},
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: { y: { beginAtZero: true, max: 100 } }
+          }
+        });
+
+        // 3. Top 10 mais baixos
+        const lowestAccessChart = new Chart(document.getElementById('lowestAccessChart'), {
+          type: 'bar',
+          data: {
+            labels: {{ lowest_labels | tojson | safe }},
+            datasets: [{
+              label: '% Access',
+              data: {{ lowest_values | tojson | safe }},
+              backgroundColor: {{ top10_colors | tojson | safe }},
+              borderColor: {{ top10_borders | tojson | safe }},
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            scales: { x: { beginAtZero: true, max: 100 } }
+          }
+        });
+
+        // 4. Por região de desenvolvimento
+        const devRegionChart = new Chart(document.getElementById('devRegionChart'), {
+          type: 'bar',
+          data: {
+            labels: {{ dev_labels | tojson | safe }},
+            datasets: [{
+              label: 'Average %',
+              data: {{ dev_values | tojson | safe }},
+              backgroundColor: {{ top10_colors | tojson | safe }},
+              borderColor: {{ top10_borders | tojson | safe }},
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: { y: { beginAtZero: true, max: 100 } }
+          }
+        });
+     </script>
 
   
 

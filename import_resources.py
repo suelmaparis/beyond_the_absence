@@ -1,13 +1,14 @@
 import csv
 from app import app, db
 from models import Resource
+import pandas as pd
 
-with app.app_context():
-    with open('beyond_resources_full.csv', newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            resource = Resource(**row)
-            db.session.add(resource)
-        db.session.commit()
+df_special = pd.read_excel("db/special_needs_moms.xlsx", header=0)  # <- Lê a linha correta como cabeçalho
+df_special.columns = df_special.columns.str.strip().str.lower().str.replace(' ', '_')
 
-print("✔️ Recursos importados com sucesso!")
+print("📊 Colunas finais:", df_special.columns.tolist())
+
+
+
+
+

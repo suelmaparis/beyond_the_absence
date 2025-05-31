@@ -792,7 +792,7 @@ button:not(:disabled),
    }
    
    .btn-outline-primary {
-     border-radius: 2rem;
+    
      font-weight: 600;
      transition: 0.3s;
    }

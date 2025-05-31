@@ -56,27 +56,32 @@ admin.add_view(AuthModelView(Tip, db.session))
 
 def get_dashboard_data():
     from country_continent_map import country_continent_map
+    import random
+    import pandas as pd
 
+    # ===== Carregar os dados principais =====
     df_world = pd.read_csv('db/mom_world_dataset.csv', skiprows=4)
+    df_special = pd.read_excel("db/special_needs_moms.xlsx", header=0)
+    df_special.columns = df_special.columns.str.strip().str.lower().str.replace(' ', '_')
 
-    excluidos = [
-        'Africa Eastern and Southern', 'Africa Western and Central', 'Arab World',
-        'World', 'High income', 'Low income', 'Upper middle income',
-        'Lower middle income', 'Low & middle income', 'OECD members',
-        'Fragile and conflict affected situations', 'Latin America & Caribbean',
-        'Sub-Saharan Africa', 'Europe & Central Asia', 'Middle East & North Africa',
-        'South Asia', 'East Asia & Pacific'
-    ]
-    df_world = df_world[~df_world['Country Name'].isin(excluidos)]
-    df_world['Continent'] = df_world['Country Name'].map(country_continent_map)
-    df_world = df_world.dropna(subset=['Continent', '2022'])
+    # Renomear colunas para facilitar leitura
+    df_special.rename(columns={
+        'category': 'population_group',
+        'total': 'value_total',
+        'children_with_functional_difficulties': 'value_with_difficulty',
+        'children_without_functional_difficulties': 'value_without_difficulty',
+        'countries_and_areas': 'country',
+        'development_regions': 'development_status'
+    }, inplace=True)
 
-    continent_group = df_world.groupby('Continent')['2022'].mean().round(2)
-    continent_labels = continent_group.index.tolist()
-    continent_values = continent_group.values.tolist()
+    # Garantir que os dados são numéricos
+    df_special['value_total'] = pd.to_numeric(df_special['value_total'], errors='coerce')
+    df_special['value_with_difficulty'] = pd.to_numeric(df_special['value_with_difficulty'], errors='coerce')
+    df_special['value_without_difficulty'] = pd.to_numeric(df_special['value_without_difficulty'], errors='coerce')
 
     df_moms = pd.read_csv('db/single_mom_dataset.csv')
 
+    # ===== Fun��es auxiliares para cores =====
     def random_color():
         return f"rgba({random.randint(0,255)}, {random.randint(0,255)}, {random.randint(0,255)}, 0.5)"
     def generate_colors(n):
@@ -84,7 +89,22 @@ def get_dashboard_data():
         border = [color.replace('0.5', '1') for color in bg]
         return bg, border
 
+    # ===== Vari�veis de gr�ficos =====
     age_labels, age_data, age_colors, age_borders = [], [], [], []
+    anxious_labels, anxious_data, anxious_colors, anxious_borders = [], [], [], []
+    suicide_labels, suicide_data, suicide_colors = [], [], []
+    sleep_labels, sleep_data, sleep_colors, sleep_borders = [], [], [], []
+    bonding_labels, bonding_data, bonding_colors, bonding_borders = [], [], [], []
+
+    continent_labels, continent_values, continent_colors, continent_borders = [], [], [], []
+    top10_labels, top10_data, top10_colors, top10_borders = [], [], [], []
+    comp_labels, data_2010, data_2022, comp_colors = [], [], [], []
+
+    special_labels, special_values, special_colors, special_borders = [], [], [], []
+    lowest_labels, lowest_values, lowest_colors, lowest_borders = [], [], [], []
+    dev_labels, dev_values = [], []
+
+    # ===== AGE =====
     if 'age' in df_moms.columns:
         df_moms = df_moms.dropna(subset=['age'])
         df_moms['age'] = df_moms['age'].astype(int)
@@ -93,6 +113,7 @@ def get_dashboard_data():
         age_data = age_counts.values.tolist()
         age_colors, age_borders = generate_colors(len(age_labels))
 
+    # ===== MENTAL HEALTH INDICATORS =====
     anxious_counts = df_moms['Feeling anxious'].value_counts()
     anxious_labels = anxious_counts.index.tolist()
     anxious_data = anxious_counts.values.tolist()
@@ -113,11 +134,31 @@ def get_dashboard_data():
     bonding_data = bonding_counts.values.tolist()
     bonding_colors, bonding_borders = generate_colors(len(bonding_labels))
 
+    # ===== CONTINENT VIEW =====
+    excluidos = [
+        'Africa Eastern and Southern', 'Africa Western and Central', 'Arab World',
+        'World', 'High income', 'Low income', 'Upper middle income',
+        'Lower middle income', 'Low & middle income', 'OECD members',
+        'Fragile and conflict affected situations', 'Latin America & Caribbean',
+        'Sub-Saharan Africa', 'Europe & Central Asia', 'Middle East & North Africa',
+        'South Asia', 'East Asia & Pacific'
+    ]
+    df_world = df_world[~df_world['Country Name'].isin(excluidos)]
+    df_world['Continent'] = df_world['Country Name'].map(country_continent_map)
+    df_world = df_world.dropna(subset=['Continent', '2022'])
+
+    continent_group = df_world.groupby('Continent')['2022'].mean().round(2)
+    continent_labels = continent_group.index.tolist()
+    continent_values = continent_group.values.tolist()
+    continent_colors, continent_borders = generate_colors(len(continent_labels))
+
+    # ===== TOP 10 COUNTRIES =====
     top10_df = df_world[['Country Name', '2022']].dropna().sort_values(by='2022', ascending=False).head(10)
     top10_labels = top10_df['Country Name'].tolist()
     top10_data = top10_df['2022'].tolist()
     top10_colors, top10_borders = generate_colors(len(top10_labels))
 
+    # ===== COMPARISON 2010 vs 2022 =====
     if '2010' in df_world.columns:
         comparison_df = df_world.dropna(subset=['2010', '2022'])
         comp_group = comparison_df.groupby('Continent')[['2010', '2022']].mean().round(2)
@@ -125,11 +166,59 @@ def get_dashboard_data():
         data_2010 = comp_group['2010'].tolist()
         data_2022 = comp_group['2022'].tolist()
         comp_colors, _ = generate_colors(len(comp_labels))
-    else:
-        comp_labels, data_2010, data_2022, comp_colors = [], [], [], []
 
-    continent_colors, continent_borders = generate_colors(len(continent_labels))
+    # ===== SPECIAL NEEDS: Group Summary (Gender/Urban/Rural) =====
+    special_group_summary = df_special[
+        (df_special['indicator'] == 'ANAR Primary') &
+        (df_special['population_group'].isin(['Male', 'Female', 'Total']))
+    ]
+    if not special_group_summary.empty:
+        grouped = special_group_summary.groupby('population_group')['value_total'].mean().round(2)
+        special_labels = grouped.index.tolist()
+        special_values = grouped.values.tolist()
+        special_colors, special_borders = generate_colors(len(special_labels))
 
+    # ===== SPECIAL NEEDS: Lowest 10 countries =====
+    lowest_df = df_special[
+        (df_special['indicator'] == 'ANAR Primary') &
+        (df_special['population_group'] == 'Total')
+    ].dropna(subset=['value_with_difficulty'])
+
+    if not lowest_df.empty:
+        lowest_sorted = lowest_df.sort_values(by='value_with_difficulty').head(10)
+        lowest_labels = lowest_sorted['country'].tolist()
+        lowest_values = lowest_sorted['value_with_difficulty'].tolist()
+        lowest_colors, lowest_borders = generate_colors(len(lowest_labels))
+
+    # ===== SPECIAL NEEDS: By Development Status =====
+    dev_df = df_special[
+        (df_special['indicator'] == 'ANAR Primary') &
+        (df_special['population_group'] == 'Total')
+    ]
+    if not dev_df.empty:
+        grouped_dev = dev_df.groupby('development_status')['value_with_difficulty'].mean().round(2)
+        dev_labels = grouped_dev.index.tolist()
+        dev_values = grouped_dev.values.tolist()
+
+    # ===== SPECIAL NEEDS: Urban vs Rural Average =====
+    avg_urban = None
+    avg_rural = None
+
+    urban_data = df_special[
+        (df_special['indicator'] == 'ANAR Primary') &
+        (df_special['population_group'] == 'Urban')
+    ]
+    rural_data = df_special[
+        (df_special['indicator'] == 'ANAR Primary') &
+        (df_special['population_group'] == 'Rural')
+    ]
+
+    if not urban_data.empty:
+        avg_urban = round(urban_data['value_with_difficulty'].mean(), 2)
+    if not rural_data.empty:
+        avg_rural = round(rural_data['value_with_difficulty'].mean(), 2)
+
+    # ===== Return para o template =====
     return dict(
         age_labels=age_labels, age_data=age_data, age_colors=age_colors, age_borders=age_borders,
         anxious_labels=anxious_labels, anxious_data=anxious_data, anxious_colors=anxious_colors, anxious_borders=anxious_borders,
@@ -138,8 +227,12 @@ def get_dashboard_data():
         bonding_labels=bonding_labels, bonding_data=bonding_data, bonding_colors=bonding_colors, bonding_borders=bonding_borders,
         continent_labels=continent_labels, continent_values=continent_values, continent_colors=continent_colors, continent_borders=continent_borders,
         top10_labels=top10_labels, top10_data=top10_data, top10_colors=top10_colors, top10_borders=top10_borders,
-        comp_labels=comp_labels, data_2010=data_2010, data_2022=data_2022, comp_colors=comp_colors
+        comp_labels=comp_labels, data_2010=data_2010, data_2022=data_2022, comp_colors=comp_colors,
+        special_labels=special_labels, special_values=special_values, special_colors=special_colors, special_borders=special_borders,
+        lowest_labels=lowest_labels, lowest_values=lowest_values, lowest_colors=lowest_colors, lowest_borders=lowest_borders,
+        dev_labels=dev_labels, dev_values=dev_values, avg_urban=avg_urban, avg_rural=avg_rural
     )
+
 
 
 @app.route('/send_email', methods=['POST'])
