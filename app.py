@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash
 from flask_migrate import Migrate
 
 
-from models import db, BlogPost, Comment, User, Resource, Question, Tip, CheckIn
+from models import db, BlogPost, Comment, User, Resource, Question, Tip, CheckIn, Event
 from flask_login import LoginManager
 
 from dotenv import load_dotenv
@@ -53,6 +53,7 @@ admin.add_view(AuthModelView(Resource, db.session))
 admin.add_view(AuthModelView(BlogPost, db.session))
 admin.add_view(AuthModelView(Question, db.session))
 admin.add_view(AuthModelView(Tip, db.session))
+admin.add_view(AuthModelView(Event, db.session))
 
 def get_dashboard_data():
     from country_continent_map import country_continent_map
@@ -370,4 +371,16 @@ def logout():
 def get_questions():
     questions = Question.query.all()
     return jsonify([{'id': q.id, 'text': q.text, 'category': q.category} for q in questions])
+
+@app.route('/api/events')
+def get_events():
+    events = Event.query.all()
+    return jsonify([{
+        'name': e.name,
+        'date': e.date,
+        'time': e.time,
+        'location': e.location,
+        'description': e.description,
+        'link': e.link
+    } for e in events])
 

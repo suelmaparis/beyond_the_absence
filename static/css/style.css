@@ -802,4 +802,42 @@ button:not(:disabled),
      color: #fff;
      border-color: #5f4b8b;
    }
+
+   .single-event-carousel {
+     position: relative;
+     width: 100%;
+     max-width: 400px;
+     height: auto;
+     margin: 20px auto;
+     padding: 15px;
+     background: #ffffff;
+     border-radius: 12px;
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+     overflow: hidden;
+   }
+   
+   .event-slide {
+     display: none;
+     animation: fade 0.5s ease-in-out;
+   }
+   
+   .event-slide.active {
+     display: block;
+   }
+   
+   @keyframes fade {
+     from {opacity: 0;}
+     to {opacity: 1;}
+   }
+   
+   .event-slide a {
+     display: inline-block;
+     margin-top: 10px;
+     background-color: #7a60d1;
+     color: white;
+     padding: 6px 12px;
+     text-decoration: none;
+     border-radius: 6px;
+   }
+   
    

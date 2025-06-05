@@ -144,7 +144,12 @@
               </select>
             </div>
           </div>
-      
+         
+          <div id="event-carousel-wrapper" class="text-center mb-4">
+            <h3>🌸 What’s Happening for You This Month<🌸/h3>
+            <div id="event-carousel" class="single-event-carousel"></div>
+          </div>
+          
           <!-- Etapa 2: Perguntas -->
           <div id="checkin-question" class="d-none">
             <form id="question-form" class="p-4 bg-white rounded shadow-sm border">
@@ -173,7 +178,40 @@
     </div>
   </div>
 </section>
+<script>
+      let carouselIndex = 0;
+      let slides = [];
 
+      fetch('/api/events')
+        .then(res => res.json())
+        .then(events => {
+          const carousel = document.getElementById('event-carousel');
+
+          events.forEach((event, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'event-slide';
+            slide.innerHTML = `
+              <h4>${event.name} – ${event.date}</h4>
+              <p>${event.description}<br><strong>${event.time} | ${event.location}</strong></p>
+              <a href="${event.link}" target="_blank">Sign Up</a>
+            `;
+            carousel.appendChild(slide);
+          });
+
+          slides = document.querySelectorAll('.event-slide');
+          if (slides.length > 0) {
+            slides[0].classList.add('active');
+
+            setInterval(() => {
+              slides[carouselIndex].classList.remove('active');
+              carouselIndex = (carouselIndex + 1) % slides.length;
+              slides[carouselIndex].classList.add('active');
+            }, 5000);
+          }
+        });
+
+  </script>
+  
 <script>
   let questions = [];
   let currentIndex = 0;
@@ -187,21 +225,24 @@
     }
   });
 
-  async function startCheckin(mood) {
-    answers["mood"] = mood;
+        async function startCheckin(mood) {
+        answers["mood"] = mood;
 
-    const res = await fetch('/api/questions');
-    questions = await res.json();
 
-    if (!questions || questions.length === 0) {
-      alert("No questions available.");
-      return;
-    }
+        document.getElementById('event-carousel-wrapper').style.display = 'none';
 
-    document.getElementById('checkin-intro').classList.add('d-none');
-    document.getElementById('checkin-question').classList.remove('d-none');
-    showQuestionGroup();
-  }
+        const res = await fetch('/api/questions');
+        questions = await res.json();
+
+        if (!questions || questions.length === 0) {
+          alert("No questions available.");
+          return;
+        }
+        document.getElementById('checkin-intro').classList.add('d-none');
+        document.getElementById('checkin-question').classList.remove('d-none');
+        showQuestionGroup();
+      }
+
 
   function showQuestionGroup() {
     const groupContainer = document.getElementById('question-group');
@@ -361,23 +402,27 @@
           <!-- Page 2: Mental Health -->
           <div class="chart-page" id="page2" style="display:none;">
             <div class="row">
-                          <!-- Problems of Bonding -->
-              <div class="col-md-6 mb-4">
+              <!-- Problems of Bonding -->
+              <div class="col-md-6">
                 <div class="card">
                   <div class="card-body">
                     <h5 class="card-title">Problems of Bonding with Baby</h5>
-                    <canvas id="bondingChart"></canvas>
+                    <div style="height: 350px;">
+                      <canvas id="bondingChart"></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
 
 
               <!-- Feeling Anxious -->
-              <div class="col-md-6 mb-4">
+              <div class="col-md-6">
                 <div class="card">
                   <div class="card-body">
                     <h5 class="card-title">Feeling Anxious</h5>
-                    <canvas id="anxiousChart"></canvas>
+                    <div style="height: 350px;">
+                     <canvas id="anxiousChart"></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -387,7 +432,7 @@
                 <div class="card">
                   <div class="card-body">
                     <h5 class="card-title">Suicide Attempt</h5>   
-                    <div style="height: 258px;">
+                    <div style="height: 350px;">
                       <canvas id="suicideChart"></canvas>
                     </div>   
                   </div>
@@ -395,11 +440,13 @@
               </div>
 
               <!-- Trouble Sleeping -->
-              <div class="col-md-6 mb-4">
+              <div class="col-md-6">
                 <div class="card">
                   <div class="card-body">
                     <h5 class="card-title">Trouble Sleeping at Night</h5>
-                    <canvas id="sleepChart"></canvas>
+                    <div style="height: 350px;">
+                     <canvas id="sleepChart"></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -482,7 +529,7 @@
             // Anxious Chart
             const anxiousCtx = document.getElementById('anxiousChart').getContext('2d');
             new Chart(anxiousCtx, {
-              type: 'bar',
+              type: 'pie',
               data: {
                 labels: {{ anxious_labels | tojson | safe }},
                 datasets: [{
@@ -493,7 +540,10 @@
                   borderWidth: 1
                 }]
               },
-              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+              options: {
+                responsive: true,
+                maintainAspectRatio: false
+              }
             });
           
             // Suicide Attempt Chart
@@ -519,7 +569,7 @@
             // Trouble Sleeping Chart
             const sleepCtx = document.getElementById('sleepChart').getContext('2d');
             new Chart(sleepCtx, {
-              type: 'bar',
+              type: 'pie',
               data: {
                 labels: {{ sleep_labels | tojson | safe }},
                 datasets: [{
@@ -530,7 +580,10 @@
                   borderWidth: 1
                 }]
               },
-              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+              options: {
+                responsive: true,
+                maintainAspectRatio: false
+              }
             });
 
             //Female Population by Continent
@@ -557,7 +610,7 @@
              // Problems of Bonding with Baby
             const bondingCtx = document.getElementById('bondingChart').getContext('2d');
             new Chart(bondingCtx, {
-              type: 'bar',
+              type: 'pie',
               data: {
                 labels: {{ bonding_labels | tojson | safe }},
                 datasets: [{
@@ -568,7 +621,10 @@
                   borderWidth: 1
                 }]
               },
-              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+              options: {
+                responsive: true,
+                maintainAspectRatio: false
+              }
             });
               //Top 10 países com maior % de mulheres (2022)
             const top10Ctx = document.getElementById('top10Chart').getContext('2d');
