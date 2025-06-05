@@ -462,7 +462,9 @@
                 <div class="card shadow-sm">
                   <div class="card-body">
                     <h5 class="card-title">School Access by Location (Urban vs Rural)</h5>
-                    <canvas id="accessDiffChart" ></canvas>
+                    <div style="height: 350px;">
+                     <canvas id="accessDiffChart" ></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -472,7 +474,9 @@
                 <div class="card shadow-sm">
                   <div class="card-body">
                     <h5 class="card-title">Avg. School Access: By Gender </h5>
-                    <canvas id="genderChart" ></canvas>
+                    <div style="height: 350px;">
+                     <canvas id="genderChart" ></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -672,9 +676,9 @@
               }
             });
 
-                        // 1. Média global - dificuldades vs. sem
+              // 1. Média global - dificuldades vs. sem
                 const accessDiffChart = new Chart(document.getElementById('accessDiffChart'), {
-                type: 'bar',
+                type: 'pie',
                 data: {
                   labels: ['Urban', 'Rural'],
                   datasets: [{
@@ -686,14 +690,15 @@
                   }]
                 },
                 options: {
-                  scales: { y: { beginAtZero: true, max: 100 } }
-                }
+                responsive: true,
+                maintainAspectRatio: false
+              }
               });
 
 
-                    // 2. Gênero
+            // 2. Gênero
         const genderChart = new Chart(document.getElementById('genderChart'), {
-          type: 'bar',
+          type: 'pie',
           data: {
             labels: {{ special_labels | tojson | safe }},
             datasets: [{
@@ -705,8 +710,9 @@
             }]
           },
           options: {
-            scales: { y: { beginAtZero: true, max: 100 } }
-          }
+                responsive: true,
+                maintainAspectRatio: false
+              }
         });
 
         // 3. Top 10 mais baixos

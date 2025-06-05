@@ -171,7 +171,7 @@ def get_dashboard_data():
     # ===== SPECIAL NEEDS: Group Summary (Gender/Urban/Rural) =====
     special_group_summary = df_special[
         (df_special['indicator'] == 'ANAR Primary') &
-        (df_special['population_group'].isin(['Male', 'Female', 'Total']))
+        (df_special['population_group'].isin(['Male', 'Female']))
     ]
     if not special_group_summary.empty:
         grouped = special_group_summary.groupby('population_group')['value_total'].mean().round(2)
