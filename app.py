@@ -27,6 +27,9 @@ app = Flask(__name__)
 
 migrate = Migrate(app, db)
 
+db_url = os.environ.get("DATABASE_URL")
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 app.secret_key = 'um_valor_secreto_aqui'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
