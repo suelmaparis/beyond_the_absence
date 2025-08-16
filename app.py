@@ -24,6 +24,12 @@ MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-change-me")  # troque em prod
+
+
+app.config["SESSION_COOKIE_SECURE"] = False
+app.config["REMEMBER_COOKIE_SECURE"] = False
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 migrate = Migrate(app, db)
 

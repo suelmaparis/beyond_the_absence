@@ -28,14 +28,15 @@ class User(db.Model, UserMixin):
 
 class Resource(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(100))
-    title = db.Column(db.String(200))
+    category = db.Column(db.String(300))
+    title = db.Column(db.String(500))
     description = db.Column(db.Text)
-    email = db.Column(db.String(200))
-    website= db.Column(db.String(300))
-    phone = db.Column(db.String(100))
-    address = db.Column(db.String(300))
-    tags = db.Column(db.String(200))
+    email = db.Column(db.String(300))
+    website = db.Column(db.String(500))
+    phone = db.Column(db.String(200))
+    address = db.Column(db.String(500))
+    tags = db.Column(db.String(300))
+
 
 class CheckIn(db.Model):
     id = db.Column(db.Integer, primary_key=True)
